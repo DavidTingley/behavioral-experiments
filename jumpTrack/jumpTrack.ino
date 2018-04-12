@@ -10,7 +10,7 @@ int solenoid_Base = 6;
 int solenoid_Extension = 7;
 int startLoc = 0;
 int numTrials = 0;
-char STARTCODE = ' ';
+char STARTCODE = 'g';
 
 void setup() {
   Serial.begin(19200);
@@ -64,7 +64,7 @@ void loop() {
       timeElapsed = 0;
       startLoc = 0;
     }
-    if  (irSensor_Extension < 600. && timeElapsed < 80000)
+    if  (irSensor_Extension < 600. && timeElapsed < 8000)
     {
       if (startLoc == 0)
       {

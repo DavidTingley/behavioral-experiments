@@ -16,12 +16,12 @@ double velocityThreshold = .01;
 int trialType = 1;
 double lastSensor;
 double wheelVelocity = 0;
-float nIncorrect[] = {0.,0.,0.};
-float nCorrect[] = {0.,0.,0.};
+float nIncorrect[] = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
+float nCorrect[] = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
 int toneFrequencies[] = {3000,6000,12000};
-int runningTimes[] = {4000,8000,16000};
+int runningTimes[] = {0,4000};
 //float performance[] = {.22,.5,.675};
-float performance[] = {1.,1.,1.};
+float performance[] = {.8,.8,.8,.8,.8,.8,.8,.8,.8,.8};
 void setup()
 {
   Serial.begin(28800);
@@ -47,7 +47,7 @@ void loop()
     sensorValue = (sensorValue + lastSensor * 2) / 3.;
     wheelVelocity = (abs(sensorValue - lastSensor) + wheelVelocity * 4) / 5;
    
-           if (wheelVelocity > velocityThreshold)
+    if (wheelVelocity > velocityThreshold)
        {
       Serial.print("position = ");
       Serial.print(sensorValue, 4);
@@ -65,13 +65,14 @@ void loop()
 //          delay(1);
 //          }
 //        }
-        if (trialType==1){ // white noise 2kHz-11kHz
-          for (int i = 5000; i >= 2000; i=i-10) {
-          int r = random(2000,11000);
-          tone(speakerPin, r,2);
-          delay(1);
-          }
-        }
+//        if (trialType==1){ // white noise 2kHz-11kHz
+//          for (int i = 0; i <= trialType; i=i+1) {
+//          int r = random(50,150);
+//          int wNoise = random(2000,11000);
+//          tone(speakerPin, 10000 ,20);
+//          delay(r);
+//          }
+//        }
 //        if (trialType==2){ // FM upsweep 8kHz-11kHz
 //          for (int i = 8000; i <= 11000; i=i+10) {
 //          tone(speakerPin, i,2);
@@ -86,38 +87,36 @@ void loop()
       int distFromTarget = runningTimes[trialType] - int(millis() - lastMillis) + 1000;
       if (tStart == 1)
       {
-        if (millis() - lastMillis > 1000. + .25*runningTimes[trialType] && abs(distFromTarget) < int(performance[trialType] * runningTimes[trialType])) 
+        if (millis() - lastMillis > 1000. && (distFromTarget) < int(performance[trialType] * runningTimes[trialType])) 
         {
-          float bonus = (1. - (float(abs(distFromTarget)) / float(runningTimes[trialType]))) * 100.;
+          float bonus = (1. - (float(abs(distFromTarget)) / float(runningTimes[trialType]))) * 10.;
           digitalWrite(WATER, LOW);
-          delay(int(150 + bonus));
+          delay(int(50 + bonus + runningTimes[trialType]/100));
           digitalWrite(WATER, HIGH);
           nCorrect[trialType] = nCorrect[trialType] + 1;
-//          performance[trialType] = (nIncorrect[trialType] / (nCorrect[trialType] + nIncorrect[trialType]));
           performance[trialType] = performance[trialType] - .04; // increment performance (error rate) by correct
-          Serial.println(int(150 + bonus));
+          if (performance[trialType] < .5)
+          {
+            runningTimes[trialType] = runningTimes[trialType] + 10;
+          }
+          Serial.println(int(25 + bonus));
           Serial.print(trialType);
           Serial.print(" correct, off by: ");
           Serial.print(distFromTarget);
+          Serial.print(" target: ");
+          Serial.print(runningTimes[trialType]);
           Serial.print(", ");
           Serial.print(nCorrect[trialType]);
           Serial.print(" correct, ");
           Serial.print(nIncorrect[trialType]);
           Serial.print(" incorrect, performance = ");
-          Serial.print(performance[0],3);
-          Serial.print(", ");
-          Serial.print(performance[1],3);
-          Serial.print(", ");
-          Serial.println(performance[2],3);
+//          for (int i = 0; i < 10; i++)
+//          {
+            Serial.print(performance[trialType],3);
+//            Serial.print(", ");
+//          }
+          Serial.println("");
           delay(random(runningTimes[trialType] / 2., runningTimes[trialType]));
-//          if (nIncorrect[trialType] + nCorrect[trialType] > 100) {
-//            nIncorrect[trialType] = nIncorrect[trialType] -1;
-//            nCorrect[trialType] = nCorrect[trialType] -1;            
-//          }
-//          trialType = random(0,2); // change back to 3
-//          if (trialType == 2) {
-//            trialType = 1;
-//          }
         }
         else
         {
@@ -127,32 +126,41 @@ void loop()
           if (performance[trialType] > 1.){
             performance[trialType] = 1.;
           }
+//          if (performance[trialType] > .5)
+//          {
+//            runningTimes[trialType] = runningTimes[trialType] - 1;
+//          }
           Serial.print(trialType);
           Serial.print(" incorrect, off by: ");
           Serial.print(distFromTarget);
+          Serial.print(", ");
+          Serial.print("target: ");
+          Serial.print(runningTimes[trialType]);
           Serial.print(", ");
           Serial.print(nCorrect[trialType]);
           Serial.print(" correct, ");
           Serial.print(nIncorrect[trialType]);
           Serial.print(" incorrect, performance = ");
-          Serial.print(performance[0],3);
-          Serial.print(", ");
-          Serial.print(performance[1],3);
-          Serial.print(", ");
-          Serial.println(performance[2],3);
+//          for (int i = 0; i < 10; i++)
+//          {
+            Serial.print(performance[trialType],3);
+//            Serial.print(", ");
+//          }
+          Serial.println("");
           delay(random(runningTimes[trialType] / 2., runningTimes[trialType]));
-//          if (nIncorrect[trialType] + nCorrect[trialType] > 100) {
-//            nIncorrect[trialType] = nIncorrect[trialType] -1;
-//            nCorrect[trialType] = nCorrect[trialType] -1;            
-//          }
-//          trialType = random(0,2);
-//          if (trialType == 2) {
-//            trialType = 1;
-//          }
         }
+//         if (trialType == 8)
+//      {
+//      trialType = 1;
+//      }
+//      else
+//      {
+//      trialType = trialType + 1;
+//      }
       }
       lastMillis = millis();
       tStart = 0;
+     
     }
     // send it to the computer as ASCII digits
     lastSensor = sensorValue;
