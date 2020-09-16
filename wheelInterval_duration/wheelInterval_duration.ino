@@ -4,7 +4,7 @@
 #define NOFIELD 66L    // Analog output with no applied field, calibrate this
 #define TOMILLIGAUSS 1822L
 
-int WATER = 2;
+int WATER = 50;
 unsigned long lastMillis = 0.0;
 int tStart = 0;
 byte c = ' ';
@@ -12,14 +12,14 @@ byte c = ' ';
 // WHEEL STUFF
 const int wheelSensor = A0;
 double sensorValue;
-double velocityThreshold = .01;
+double velocityThreshold = .02;
 int trialType = 1;
 double lastSensor;
 double wheelVelocity = 0;
 float nIncorrect[] = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
 float nCorrect[] = {0.,0.,0.,0.,0.,0.,0.,0.,0.,0.};
 int toneFrequencies[] = {3000,6000,12000};
-int runningTimes[] = {0,4000};
+int runningTimes[] = {0,7000};
 //float performance[] = {.22,.5,.675};
 float performance[] = {.8,.8,.8,.8,.8,.8,.8,.8,.8,.8};
 void setup()
@@ -87,23 +87,23 @@ void loop()
       int distFromTarget = runningTimes[trialType] - int(millis() - lastMillis) + 1000;
       if (tStart == 1)
       {
-        if (millis() - lastMillis > 1000. && (distFromTarget) < int(performance[trialType] * runningTimes[trialType])) 
+        if (millis() - lastMillis > 1000. && (distFromTarget) < int(performance[trialType] * 0.5 * runningTimes[trialType])) 
         {
           float bonus = (1. - (float(abs(distFromTarget)) / float(runningTimes[trialType]))) * 10.;
           digitalWrite(WATER, LOW);
-          delay(int(50 + bonus + runningTimes[trialType]/100));
+          delay(int(150 + bonus + runningTimes[trialType]/100));
           digitalWrite(WATER, HIGH);
           nCorrect[trialType] = nCorrect[trialType] + 1;
           performance[trialType] = performance[trialType] - .04; // increment performance (error rate) by correct
-          if (performance[trialType] < .5)
-          {
-            runningTimes[trialType] = runningTimes[trialType] + 10;
-          }
-          Serial.println(int(25 + bonus));
+//          if (performance[trialType] < .5)
+//          {
+//            runningTimes[trialType] = runningTimes[trialType] + 10;
+//          }
+          Serial.println(int(150 + bonus));
           Serial.print(trialType);
           Serial.print(" correct, off by: ");
           Serial.print(distFromTarget);
-          Serial.print(" target: ");
+          Serial.print(", target: ");
           Serial.print(runningTimes[trialType]);
           Serial.print(", ");
           Serial.print(nCorrect[trialType]);
@@ -116,7 +116,10 @@ void loop()
 //            Serial.print(", ");
 //          }
           Serial.println("");
-          delay(random(runningTimes[trialType] / 2., runningTimes[trialType]));
+          if (performance[trialType] > 0.){
+            performance[trialType] = 0.;
+          }
+//          delay(random(runningTimes[trialType] / 10., runningTimes[trialType] / 5.));
         }
         else
         {
@@ -147,7 +150,7 @@ void loop()
 //            Serial.print(", ");
 //          }
           Serial.println("");
-          delay(random(runningTimes[trialType] / 2., runningTimes[trialType]));
+//          delay(random(runningTimes[trialType] / 10., runningTimes[trialType] / 5.));
         }
 //         if (trialType == 8)
 //      {
